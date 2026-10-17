@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>Endless Aisle EIGER Wonosari</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111'/%3E%3Cpath d='M4 25 13 8l5 9 3-5 7 13z' fill='%23FFC400'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<style>
+:root{
+  --ink:#111;--ink-2:#1d1d1b;--paper:#f3f2ee;--card:#fff;--line:#e4e2db;--mute:#6c6b66;--soft:#efeee9;
+  --yel:#FFC400;--yel-d:#b88f00;--red:#D8382B;--amb:#F2B100;--grn:#1F9D57;
+  --r:14px;--sh:0 1px 2px rgba(0,0,0,.05),0 6px 20px -10px rgba(0,0,0,.18);
+  --f-head:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
+  --f-body:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 var(--f-body);padding-bottom:84px}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3{margin:0;font-family:var(--f-head);letter-spacing:.02em;text-transform:uppercase}
+.num,.mono{font-variant-numeric:tabular-nums}
+.hide{display:none!important}
+
+/* header */
+header.top{background:var(--ink);color:#fff;position:sticky;top:0;z-index:20}
+.top-in{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none}
+.brand b{font:700 20px/1 var(--f-head);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.brand small{display:block;color:#a9a8a2;font-size:11px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.brand b i{color:var(--yel);font-style:normal}
+nav.tabs{display:flex;gap:4px;margin-left:auto}
+nav.tabs button,nav.bottom button{background:none;border:0;cursor:pointer}
+nav.tabs button{color:#bdbcb6;padding:8px 14px;border-radius:8px;font:600 14px var(--f-body);letter-spacing:.02em}
+nav.tabs button:hover{color:#fff;background:#262624}
+nav.tabs button[aria-current=page]{color:var(--ink);background:var(--yel)}
+.sync{display:flex;align-items:center;gap:7px;font-size:12px;color:#cfcec8;background:#242422;border-radius:999px;padding:5px 11px;white-space:nowrap;border:0;cursor:pointer}
+.sync i{width:8px;height:8px;border-radius:50%;background:#888}
+.sync.on i{background:#34d17b}.sync.err i{background:#ff6a5c}.sync.wait i{background:var(--yel);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+
+nav.bottom{position:fixed;left:0;right:0;bottom:0;background:var(--ink);display:none;z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom button{flex:1;color:#9b9a94;padding:9px 0 8px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.bottom button svg{width:22px;height:22px}
+nav.bottom button[aria-current=page]{color:var(--yel)}
+
+main{max-width:1120px;margin:0 auto;padding:18px 16px 24px}
+.view{animation:rise .38s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stagger>*{animation:rise .45s cubic-bezier(.2,.7,.2,1) both}
+.stagger>*:nth-child(2){animation-delay:.05s}.stagger>*:nth-child(3){animation-delay:.1s}.stagger>*:nth-child(4){animation-delay:.15s}.stagger>*:nth-child(5){animation-delay:.2s}
+
+.bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:16px}
+.bar h2{font-size:30px;line-height:1;flex:1;min-width:160px}
+.bar h2 small{display:block;font:500 13px var(--f-body);letter-spacing:0;text-transform:none;color:var(--mute);margin-top:6px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>span{font-size:12px;font-weight:600;color:var(--mute);letter-spacing:.04em;text-transform:uppercase}
+input,select{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(255,196,0,.45)}
+input.bad{border-color:var(--red)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23111' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;border:1.5px solid var(--ink);background:var(--ink);color:#fff;font-weight:600;cursor:pointer;transition:transform .1s,background .15s}
+.btn:hover{background:#2b2b28}.btn:active{transform:scale(.97)}
+.btn.y{background:var(--yel);color:var(--ink);border-color:var(--yel)}.btn.y:hover{background:#ffd23d}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}.btn.ghost:hover{border-color:var(--ink);background:#fff}
+.btn.sm{min-height:34px;padding:0 12px;font-size:13px;border-radius:8px}
+.btn.danger{background:transparent;color:var(--red);border-color:#efc4bf}.btn.danger:hover{background:#fdeceb}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:18px}
+.card>h3{font-size:18px;margin-bottom:12px}
+.card>h3 small{font:400 13px var(--f-body);text-transform:none;letter-spacing:0;color:var(--mute);margin-left:8px}
+
+/* hero */
+.hero{background:var(--ink);color:#fff;border:0;position:relative;overflow:hidden;margin-bottom:14px}
+.hero:after{content:"";position:absolute;right:-30px;bottom:-40px;width:260px;height:180px;opacity:.07;background:#fff;clip-path:polygon(0 100%,38% 18%,60% 60%,72% 38%,100% 100%)}
+.hero .lbl{font:600 13px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:#a9a8a2}
+.hero .big{font:700 72px/1 var(--f-head);margin:6px 0 14px;letter-spacing:.01em}
+.hero .big small{font-size:34px;color:var(--yel);margin-left:2px}
+.hero .meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;color:#cfcec8;font-size:14px}
+.hero .pb{background:#33332f}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#a9a8a2;margin-top:12px;position:relative;z-index:1}
+.legend span:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--c)}
+
+.pb{height:14px;border-radius:99px;background:var(--soft);overflow:hidden;position:relative}
+.pb i{display:block;height:100%;border-radius:99px;transition:width .9s cubic-bezier(.2,.8,.2,1),background .3s;min-width:0}
+.pb i.lo{background:var(--red)}.pb i.mid{background:var(--amb)}.pb i.ok{background:var(--grn)}.pb i.na{background:#bbb}
+.pb.sm{height:9px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+.kpi .lbl{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.kpi .val{font:700 34px/1.1 var(--f-head);margin-top:8px;letter-spacing:.01em;overflow-wrap:anywhere}
+.kpi.acc{border-top:4px solid var(--yel)}
+.kpi .sub{font-size:12px;color:var(--mute);margin-top:4px}
+
+.grid2{display:grid;grid-template-columns:1fr;gap:14px}
+
+/* chart */
+.chart{display:flex;flex-direction:column;gap:14px}
+.crow{display:grid;grid-template-columns:150px 1fr 118px;gap:12px;align-items:center}
+.crow .cv{text-align:right;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.crow .nm{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctrack{position:relative;height:26px;background:var(--soft);border-radius:6px}
+.ctrack i{position:absolute;left:0;top:0;bottom:0;background:var(--ink);border-radius:6px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.ctrack b{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--yel);border-radius:2px;box-shadow:0 0 0 1.5px #fff}
+.clegend{display:flex;gap:16px;font-size:12px;color:var(--mute);margin-top:12px}
+.clegend span:before{content:"";display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:2px;background:var(--c)}
+
+/* tables */
+.tw{overflow:hidden;border:1px solid var(--line);border-radius:var(--r);background:#fff;box-shadow:var(--sh)}
+table{width:100%;border-collapse:collapse}
+th{background:var(--ink);color:#fff;font:600 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:12px 14px;white-space:nowrap}
+td{padding:12px 14px;border-top:1px solid var(--line);vertical-align:middle}
+tbody tr:hover{background:#faf9f5}
+.r{text-align:right}
+td.pc{min-width:200px}
+.pcell{display:flex;align-items:center;gap:10px}.pcell .pb{flex:1}.pcell b{width:56px;text-align:right}
+tfoot td{background:var(--soft);font-weight:700;border-top:2px solid var(--ink)}
+.link{background:none;border:0;padding:0;font-weight:600;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--yel);text-decoration-thickness:3px;text-underline-offset:3px}
+.empty{padding:36px 18px;text-align:center;color:var(--mute)}
+.empty b{display:block;color:var(--ink);font:700 20px var(--f-head);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--yel);color:var(--ink);margin-left:6px;vertical-align:middle}
+.tag.g{background:var(--soft);color:var(--mute)}
+.acts{display:flex;gap:6px;justify-content:flex-end}
+
+.filters{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:10px;align-items:end;margin-bottom:12px}
+.sum{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 2px 10px;color:var(--mute);font-size:14px}
+.sum b{color:var(--ink)}
+
+/* settings */
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>.field{flex:1;min-width:150px}
+.rarow{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.hint{font-size:13px;color:var(--mute)}
+.hint.warn{color:#8a6a00;background:#fff6d6;border-radius:8px;padding:8px 10px}
+ol.steps{padding-left:20px;margin:8px 0 0;font-size:13.5px;color:#333}ol.steps li{margin:6px 0}
+code,pre{font:12.5px ui-monospace,Menlo,Consolas,monospace;background:var(--soft);border-radius:6px}
+code{padding:1px 5px}pre{padding:10px 12px;overflow:auto;margin:8px 0}
+textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font:12.5px ui-monospace,Menlo,Consolas,monospace;min-height:120px;outline:none}
+textarea:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(255,196,0,.45)}
+details summary{cursor:pointer;font-weight:600;margin-top:10px}
+
+/* fab / dialog / toast */
+.fab{position:fixed;right:20px;bottom:24px;z-index:19;height:56px;padding:0 22px 0 18px;border-radius:99px;border:0;background:var(--yel);color:var(--ink);font:700 15px var(--f-body);display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 10px 24px -8px rgba(0,0,0,.5);transition:transform .12s}
+.fab:hover{transform:translateY(-2px)}.fab:active{transform:scale(.96)}
+dialog{border:0;border-radius:18px;padding:0;width:min(480px,calc(100vw - 24px));box-shadow:0 30px 80px -20px rgba(0,0,0,.55);color:var(--ink)}
+dialog.wide{width:min(680px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(17,17,17,.55);backdrop-filter:blur(2px)}
+dialog[open]{animation:pop .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}}
+.dh{background:var(--ink);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.dh h3{font-size:22px}.dh button{background:none;border:0;color:#fff;font-size:26px;line-height:1;cursor:pointer}
+.db{padding:20px;display:flex;flex-direction:column;gap:14px;max-height:70vh;overflow:auto}
+.df{padding:0 20px 20px;display:flex;gap:10px;justify-content:flex-end}
+.err{color:var(--red);font-size:13px;min-height:18px}
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--ink);color:#fff;padding:11px 18px;border-radius:99px;font-size:14px;box-shadow:0 10px 30px -8px rgba(0,0,0,.5);animation:rise .25s both;border-left:5px solid var(--yel)}
+.toast.bad{border-left-color:var(--red)}
+
+.imp-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.imp-sum div{background:var(--soft);border-radius:10px;padding:10px 12px}
+.imp-sum b{display:block;font:700 24px var(--f-head)}.imp-sum span{font-size:12px;color:var(--mute)}
+
+@media (max-width:900px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .filters{grid-template-columns:1fr 1fr}.filters .btn{grid-column:1/-1}
+}
+@media (max-width:720px){
+  nav.tabs{display:none}nav.bottom{display:flex}
+  .sync{margin-left:auto}
+  .brand small{display:none}.brand b{font-size:18px}
+  .fab{bottom:calc(76px + env(safe-area-inset-bottom));right:14px}
+  #toasts{bottom:150px}
+  .hero .big{font-size:60px}
+  .crow{grid-template-columns:1fr auto;gap:4px 10px}.crow .ctrack{grid-column:1/-1;grid-row:2}
+  .bar h2{font-size:26px}.bar .field{flex:1 1 140px}
+  /* tabel -> kartu */
+  table.rs thead{display:none}
+  table.rs,table.rs tbody,table.rs tr,table.rs td,table.rs tfoot{display:block}
+  table.rs tr{padding:12px 14px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+  table.rs tbody tr:first-child{border-top:0}
+  table.rs td{border:0;padding:0;text-align:left!important;min-width:0!important}
+  table.rs td:before{content:attr(data-l);display:block;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+  table.rs td.full{grid-column:1/-1}
+  table.rs td.nolbl:before{display:none}
+  table.rs td.nm{font-weight:700;font-size:16px}
+  table.rs tfoot tr{background:var(--soft);border-top:2px solid var(--ink)}
+  .acts{justify-content:flex-start}
+}
+@media (max-width:480px){.sync span{display:none}.sync{padding:9px}}
+@media (max-width:420px){.kpi .val{font-size:27px}.card{padding:14px}.hero .big{font-size:52px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="top-in">
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#FFC400"/><path d="M4 25 13 8l5 9 3-5 7 13z" fill="#111"/></svg>
+    <div><b>Endless Aisle <i>EIGER Wonosari</i></b><small>EA Sales Tracker</small></div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+  <button class="sync" id="sync" data-act="goto-sync" title="Status penyimpanan"><i></i><span>Memuat…</span></button>
+</div></header>
+
+<main>
+  <section id="v-dashboard" class="view hide"></section>
+  <section id="v-sales" class="view hide"></section>
+  <section id="v-trx" class="view hide"></section>
+  <section id="v-settings" class="view hide"></section>
+</main>
+
+<nav class="bottom" id="bottom"></nav>
+<button class="fab" data-act="add-trx" aria-label="Tambah transaksi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Transaksi</button>
+<div id="toasts" aria-live="polite"></div>
+
+<!-- Form transaksi -->
+<dialog id="dTrx">
+  <form method="dialog" id="fTrx" novalidate>
+    <div class="dh"><h3 id="dTrxTitle">Input Transaksi EA</h3><button type="button" data-close aria-label="Tutup">×</button></div>
+    <div class="db">
+      <label class="field"><span>Sales Person (RA)</span><select id="fRa" required></select></label>
+      <label class="field"><span>Tanggal Transaksi</span><input type="date" id="fDate" required></label>
+      <label class="field"><span>Nomor Transaksi</span><input id="fInv" placeholder="mis. 2342-261016-1-00002" autocomplete="off" required></label>
+      <label class="field"><span>Nominal Sales EA (Rp)</span><input id="fAmt" inputmode="numeric" placeholder="0" autocomplete="off" required></label>
+      <div class="err" id="fErr"></div>
+    </div>
+    <div class="df"><button type="button" class="btn ghost" data-close>Batal</button><button class="btn y" id="fSave">Simpan</button></div>
+  </form>
+</dialog>
+
+<!-- Konfirmasi -->
+<dialog id="dConfirm">
+  <div class="dh"><h3 id="cTitle">Konfirmasi</h3></div>
+  <div class="db"><div id="cMsg"></div></div>
+  <div class="df"><button class="btn ghost" id="cNo">Batal</button><button class="btn danger" id="cYes">Ya</button></div>
+</dialog>
+
+<!-- Preview impor -->
+<dialog id="dImp" class="wide">
+  <div class="dh"><h3>Pratinjau Impor Excel</h3><button type="button" data-close aria-label="Tutup">×</button></div>
+  <div class="db" id="impBody"></div>
+  <div class="df"><button class="btn ghost" data-close>Batal</button><button class="btn y" id="impGo">Impor</button></div>
+</dialog>
+
+<script>
+/* ==========================================================================
+   KONFIGURASI FIREBASE (opsional)
+   Cara paling mudah: biarkan null, lalu tempel config di tab Pengaturan > Sinkronisasi.
+   Atau isi langsung di sini, contoh:
+   const FIREBASE_CONFIG = { apiKey:"...", authDomain:"...", projectId:"...", appId:"..." };
+   ========================================================================== */
+const FIREBASE_CONFIG = null;
+
+/* ================= util ================= */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const rp=n=>(n<0?'-':'')+'Rp'+Math.abs(Math.round(n||0)).toLocaleString('id-ID');
+const pctTxt=p=>p==null?'–':(Math.round(p*10)/10).toLocaleString('id-ID')+'%';
+const fmtDate=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})};
+const monthLabel=k=>{const[y,m]=k.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'})};
+const parseAmt=s=>{s=String(s).trim();const neg=/^-/.test(s);const d=s.replace(/\D/g,'');return d?(neg?-1:1)*Number(d):NaN};
+const fmtAmtInput=s=>{const neg=/^\s*-/.test(s);const d=String(s).replace(/\D/g,'');return d?(neg?'-':'')+Number(d).toLocaleString('id-ID'):(neg?'-':'')};
+const lsGet=(k,d=null)=>{try{const v=localStorage.getItem(k);return v==null?d:v}catch{return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
+const normName=s=>String(s||'').toUpperCase().replace(/\s+/g,' ').trim();
+const normInv=s=>String(s||'').trim().toLowerCase();
+const DEL=Symbol('del');
+
+/* ================= penyimpanan ================= */
+function setPath(obj,path,val){
+  const k=path.split('.');let o=obj;
+  for(let i=0;i<k.length-1;i++){if(typeof o[k[i]]!=='object'||o[k[i]]===null)o[k[i]]={};o=o[k[i]]}
+  if(val===DEL)delete o[k[k.length-1]];else o[k[k.length-1]]=val;
+}
+const LOCAL_KEY='ea_tracker_v1';
+function createLocalStore(){
+  let data;
+  const load=()=>{try{data=JSON.parse(lsGet(LOCAL_KEY)||'null')}catch{data=null}
+    data=data||{};data.settings=data.settings||{ras:{},targets:{}};data.settings.ras=data.settings.ras||{};data.settings.targets=data.settings.targets||{};data.txns=data.txns||{}};
+  const save=()=>lsSet(LOCAL_KEY,JSON.stringify(data));
+  let cb;const emit=()=>cb&&cb({settings:data.settings,txns:Object.entries(data.txns).map(([id,t])=>({id,...t}))});
+  load();
+  return{mode:'local',
+    start(fn,status){cb=fn;status('local');emit();window.addEventListener('storage',e=>{if(e.key===LOCAL_KEY){load();emit()}})},
+    async patchSettings(p){for(const[k,v]of Object.entries(p))setPath(data.settings,k,v);save();emit()},
+    async saveTxn(t){const{id,...rest}=t;data.txns[id||uid()]=rest;save();emit()},
+    async deleteTxn(id){delete data.txns[id];save();emit()},
+    async addTxns(list){for(const t of list){const{id,...r}=t;data.txns[id]=r}save();emit()},
+    raw:()=>JSON.parse(JSON.stringify(data)),
+  };
+}
+async function createFirebaseStore(cfg){
+  const V='10.12.2',B=`https://www.gstatic.com/firebasejs/${V}/`;
+  const [A,F,AU]=await Promise.all([import(B+'firebase-app.js'),import(B+'firebase-firestore.js'),import(B+'firebase-auth.js')]);
+  const app=A.initializeApp(cfg);
+  let db;
+  try{db=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})})}
+  catch{db=F.getFirestore(app)}
+  try{await AU.signInAnonymously(AU.getAuth(app))}catch(e){console.warn('Anonymous auth tidak aktif / gagal:',e.code||e)}
+  const sRef=F.doc(db,'ea_settings','main'), tCol=F.collection(db,'ea_transactions');
+  const flat=p=>{const o={};for(const[k,v]of Object.entries(p))o[k]=v===DEL?F.deleteField():v;return o};
+  let settings={ras:{},targets:{}},txns=[],cb,status;
+  const emit=()=>cb({settings,txns});
+  return{mode:'firebase',
+    start(fn,st){cb=fn;status=st;st('wait');
+      F.onSnapshot(sRef,s=>{const d=s.data()||{};settings={ras:d.ras||{},targets:d.targets||{}};if(!s.exists())F.setDoc(sRef,{ras:{},targets:{}},{merge:true}).catch(()=>{});status('on');emit()},e=>status('err',e));
+      F.onSnapshot(tCol,s=>{txns=s.docs.map(d=>({id:d.id,...d.data()}));status('on');emit()},e=>status('err',e));
+    },
+    async patchSettings(p){try{await F.updateDoc(sRef,flat(p))}catch(e){if(e.code==='not-found'){await F.setDoc(sRef,{ras:{},targets:{}});await F.updateDoc(sRef,flat(p))}else throw e}},
+    async saveTxn(t){const{id,...r}=t;await F.setDoc(F.doc(tCol,id||uid()),r)},
+    async deleteTxn(id){await F.deleteDoc(F.doc(tCol,id))},
+    async addTxns(list){for(let i=0;i<list.length;i+=400){const b=F.writeBatch(db);list.slice(i,i+400).forEach(({id,...r})=>b.set(F.doc(tCol,id),r));await b.commit()}},
+    async pushLocal(raw){await F.setDoc(sRef,raw.settings,{merge:true});await this.addTxns(Object.entries(raw.txns).map(([id,t])=>({id,...t})))},
+  };
+}
+function readFbConfig(){
+  if(FIREBASE_CONFIG)return{cfg:FIREBASE_CONFIG,fromCode:true};
+  try{const c=JSON.parse(lsGet('ea_fb_config')||'null');if(c&&c.apiKey&&c.projectId)return{cfg:c}}catch{}
+  return null;
+}
+function parseFbConfig(txt){
+  const o={};for(const m of txt.matchAll(/["']?(\w+)["']?\s*:\s*["']([^"']*)["']/g))o[m[1]]=m[2];
+  return(o.apiKey&&o.projectId)?o:null;
+}
+
+/* ================= state & perhitungan ================= */
+const state={settings:{ras:{},targets:{}},txns:[],month:lsGet('ea_month')||todayStr().slice(0,7),tab:'dashboard',setMonth:todayStr().slice(0,7),
+  tf:{from:'',to:'',ra:'',q:''},editId:null,status:'wait',statusErr:null,ready:false};
+let store;
+
+const rasList=()=>Object.entries(state.settings.ras||{}).map(([id,r])=>({id,...r})).sort((a,b)=>(a.order||0)-(b.order||0)||a.name.localeCompare(b.name));
+const raName=t=>state.settings.ras?.[t.raId]?.name||t.raName||'(RA dihapus)';
+const allMonths=()=>{const s=new Set([todayStr().slice(0,7),state.month==='all'?null:state.month]);
+  state.txns.forEach(t=>s.add(t.date.slice(0,7)));Object.keys(state.settings.targets||{}).forEach(m=>s.add(m));s.delete(null);return[...s].sort().reverse()};
+const scopeMonths=()=>state.month==='all'?allMonths():[state.month];
+const tgtStore=ms=>ms.reduce((a,m)=>a+(Number(state.settings.targets?.[m]?.store)||0),0);
+const tgtRa=(id,ms)=>ms.reduce((a,m)=>a+(Number(state.settings.targets?.[m]?.ras?.[id])||0),0);
+const ach=(s,t)=>t>0?s/t*100:null;
+const cls=p=>p==null?'na':p>=100?'ok':p>=50?'mid':'lo';
+function compute(){
+  const ms=scopeMonths(),inScope=state.txns.filter(t=>state.month==='all'||t.date.startsWith(state.month));
+  const per=new Map();
+  rasList().forEach(r=>per.set(r.id,{id:r.id,name:r.name,sales:0,count:0,target:tgtRa(r.id,ms)}));
+  let orphan=null;
+  for(const t of inScope){
+    let p=per.get(t.raId);
+    if(!p){orphan=orphan||{id:'',name:'(RA dihapus)',sales:0,count:0,target:0,orphan:true};p=orphan}
+    p.sales+=t.amount;if(t.amount!==0)p.count++;
+  }
+  const rows=[...per.values()];if(orphan)rows.push(orphan);
+  rows.forEach(r=>{r.ach=ach(r.sales,r.target);r.left=Math.max(0,r.target-r.sales)});
+  rows.sort((a,b)=>b.sales-a.sales||a.name.localeCompare(b.name));
+  const sales=inScope.reduce((a,t)=>a+t.amount,0),target=tgtStore(ms);
+  return{rows,sales,target,ach:ach(sales,target),left:Math.max(0,target-sales),count:inScope.filter(t=>t.amount!==0).length,ms};
+}
+
+/* ================= angka & bar animasi ================= */
+const prevNum={},prevW={};
+const FMT={rp,int:n=>Math.round(n).toLocaleString('id-ID'),pct:pctTxt,pctn:p=>p==null?'–':(Math.round(p*10)/10).toLocaleString('id-ID')};
+const num=(key,val,fmt)=>`<span class="num" data-k="${key}" data-to="${val==null?'':val}" data-f="${fmt}">${FMT[fmt](prevNum[key]??0)}</span>`;
+const pbar=(key,p,sm)=>{const w=p==null?0:Math.min(100,p);const pv=prevW[key]??0;prevW[key]=w;
+  return `<div class="pb${sm?' sm':''}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(w)}"><i class="${cls(p)}" data-w="${w}" style="width:${pv}%"></i></div>`};
+function animate(root){
+  $$('[data-w]',root).forEach(e=>requestAnimationFrame(()=>requestAnimationFrame(()=>e.style.width=e.dataset.w+'%')));
+  $$('.num[data-k]',root).forEach(el=>{
+    const k=el.dataset.k,f=FMT[el.dataset.f],raw=el.dataset.to;const to=raw===''?null:Number(raw),from=prevNum[k]??0;
+    prevNum[k]=to??0;
+    if(to==null||from===to||matchMedia('(prefers-reduced-motion:reduce)').matches){el.textContent=f(to??0);if(to==null)el.textContent=f(null);return}
+    const t0=performance.now(),D=650;
+    (function step(now){const p=Math.min(1,(now-t0)/D),e=1-Math.pow(1-p,3);el.textContent=f(from+(to-from)*e);if(p<1)requestAnimationFrame(step);else el.textContent=f(to)})(t0);
+  });
+  $$('[data-cw]',root).forEach(e=>requestAnimationFrame(()=>requestAnimationFrame(()=>e.style.width=e.dataset.cw+'%')));
+}
+
+/* ================= tampilan ================= */
+const TABS=[['dashboard','Dashboard','<path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-3H4z"/>'],
+  ['sales','Sales Person','<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.7 3.2-5.5 6.5-5.5s5.900 1.800 6.500 5.500M16 4.500a3.500 3.500 0 0 1 0 7M18 14.800c2 .6 3.200 2.300 3.500 5.200"/>'],
+  ['trx','Transaksi','<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/>'],
+  ['settings','Pengaturan','<circle cx="12" cy="12" r="3"/><path d="M19.400 15a1.700 1.700 0 0 0 .3 1.800l.1.100a2 2 0 1 1-2.800 2.800l-.1-.1a1.700 1.700 0 0 0-1.800-.3 1.700 1.700 0 0 0-1 1.500V21a2 2 0 1 1-4 0v-.1a1.700 1.700 0 0 0-1.100-1.500 1.700 1.700 0 0 0-1.800.3l-.1.100a2 2 0 1 1-2.800-2.800l.1-.1a1.700 1.700 0 0 0 .3-1.800 1.700 1.700 0 0 0-1.500-1H3a2 2 0 1 1 0-4h.1a1.700 1.700 0 0 0 1.500-1.100 1.700 1.700 0 0 0-.3-1.800l-.1-.1a2 2 0 1 1 2.800-2.800l.1.100a1.700 1.700 0 0 0 1.800.3H9a1.700 1.700 0 0 0 1-1.500V3a2 2 0 1 1 4 0v.1a1.700 1.700 0 0 0 1 1.500 1.700 1.700 0 0 0 1.800-.3l.1-.1a2 2 0 1 1 2.800 2.800l-.1.100a1.700 1.700 0 0 0-.3 1.800V9a1.700 1.700 0 0 0 1.500 1H21a2 2 0 1 1 0 4h-.1a1.700 1.700 0 0 0-1.500 1z"/>']];
+function buildNav(){
+  $('#tabs').innerHTML=TABS.map(([k,l])=>`<button data-tab="${k}">${l}</button>`).join('');
+  $('#bottom').innerHTML=TABS.map(([k,l,ic])=>`<button data-tab="${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic}</svg>${l}</button>`).join('');
+}
+function goTab(t){
+  state.tab=t;lsSet('ea_tab',t);
+  $$('[data-tab]').forEach(b=>{if(b.dataset.tab===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  TABS.forEach(([k])=>{const v=$('#v-'+k);const show=k===t;v.classList.toggle('hide',!show);if(show){v.style.animation='none';v.offsetHeight;v.style.animation=''}});
+  $('.fab').classList.toggle('hide',t==='settings');
+  render();window.scrollTo({top:0});
+}
+function monthSelect(id='monthSel'){
+  const opts=['<option value="all">Semua bulan</option>',...allMonths().map(m=>`<option value="${m}">${esc(monthLabel(m))}</option>`)].join('');
+  return `<label class="field"><span>Periode</span><select id="${id}" data-act="month">${opts.replace(`value="${state.month}"`,`value="${state.month}" selected`)}</select></label>`;
+}
+const periodTxt=()=>state.month==='all'?'Semua bulan':monthLabel(state.month);
+
+function render(){
+  if(!state.ready)return;
+  const t=state.tab;
+  if(t==='dashboard')renderDashboard();
+  else if(t==='sales')renderSales();
+  else if(t==='trx')renderTrx();
+  else if(t==='settings'&&Date.now()-(state.lastWrite||0)>1500)renderSettings();
+}
+function noRaBanner(){return rasList().length?'':`<div class="card" style="margin-bottom:14px;border-left:5px solid var(--yel)"><b>Belum ada Sales Person (RA).</b><div class="hint">Tambahkan RA dan atur target di tab <button class="link" data-tab="settings">Pengaturan</button> sebelum mencatat transaksi.</div></div>`}
+
+function renderDashboard(){
+  const c=compute(),el=$('#v-dashboard');
+  const noTarget=c.target<=0;
+  el.innerHTML=`
+  <div class="bar"><h2>Dashboard<small>Ringkasan penjualan Endless Aisle · ${esc(periodTxt())}</small></h2>${monthSelect()}</div>
+  ${noRaBanner()}
+  <div class="card hero stagger" style="animation:none">
+    <div class="lbl">Achievement Target EA Toko</div>
+    <div class="big">${num('d-ach',c.ach,'pctn')}${c.ach==null?'':'<small>%</small>'}</div>
+    ${pbar('d-hero',c.ach)}
+    <div class="meta"><span>${rp(c.sales)} <span style="opacity:.6">dari</span> ${noTarget?'<i>target belum diatur</i>':rp(c.target)}</span><span>${c.ach==null?'':c.ach>=100?'Target tercapai 🎯':'Sisa '+rp(c.left)}</span></div>
+    <div class="legend"><span style="--c:var(--red)">&lt; 50% rendah</span><span style="--c:var(--amb)">50–99% progres</span><span style="--c:var(--grn)">≥ 100% tercapai</span></div>
+  </div>
+  <div class="kpis stagger">
+    <div class="card kpi acc"><div class="lbl">Total Sales EA</div><div class="val">${num('d-sales',c.sales,'rp')}</div></div>
+    <div class="card kpi"><div class="lbl">Target EA Toko</div><div class="val">${num('d-target',c.target,'rp')}</div></div>
+    <div class="card kpi"><div class="lbl">Jumlah Transaksi EA</div><div class="val">${num('d-count',c.count,'int')}</div></div>
+    <div class="card kpi"><div class="lbl">Sisa Target</div><div class="val">${num('d-left',c.left,'rp')}</div></div>
+  </div>
+  <div class="card"><h3>Sales EA per RA</h3>${chartHtml(c)}</div>`;
+  animate(el);
+}
+function chartHtml(c){
+  const rows=c.rows;if(!rows.length)return '<div class="empty"><b>Belum ada data</b>Tambahkan RA dan transaksi untuk melihat grafik.</div>';
+  const max=Math.max(1,...rows.map(r=>Math.max(r.sales,r.target)));
+  return `<div class="chart">${rows.map(r=>{
+    const w=Math.max(0,r.sales)/max*100,tp=r.target/max*100;
+    return `<div class="crow"><div class="nm" title="${esc(r.name)}">${esc(r.name)}</div>
+      <div class="ctrack"><i data-cw="${w}" style="width:${prevW['c-'+r.id]??0}%"></i>${r.target>0?`<b style="left:calc(${tp}% - 1px)" title="Target ${rp(r.target)}"></b>`:''}</div><div class="cv">${rp(r.sales)}</div></div>`}).join('')}</div>
+    <div class="clegend"><span style="--c:var(--ink)">Sales EA</span><span style="--c:var(--yel)">Target personal</span></div>`+rows.map(r=>(prevW['c-'+r.id]=Math.max(0,r.sales)/max*100,'')).join('');
+}
+
+function renderSales(){
+  const c=compute(),el=$('#v-sales');
+  const body=c.rows.map(r=>`<tr>
+    <td class="nm full" data-l="Nama RA">${r.orphan?esc(r.name):`<button class="link" data-act="ra-trx" data-id="${r.id}">${esc(r.name)}</button>`}</td>
+    <td class="r" data-l="Total Sales EA"><b>${num('s-'+r.id,r.sales,'rp')}</b></td>
+    <td class="r" data-l="Target">${r.target>0?rp(r.target):'<span class="hint">belum diatur</span>'}</td>
+    <td class="pc full" data-l="Achievement"><div class="pcell">${pbar('sb-'+r.id,r.ach,true)}<b>${pctTxt(r.ach)}</b></div></td>
+    <td class="r" data-l="Sisa Target">${r.target>0?rp(r.left):'–'}</td>
+    <td class="r" data-l="Transaksi">${r.count}</td></tr>`).join('');
+  el.innerHTML=`<div class="bar"><h2>Sales Person<small>Pencapaian EA per RA · ${esc(periodTxt())}</small></h2>${monthSelect()}</div>
+  ${noRaBanner()}
+  ${c.rows.length?`<div class="tw"><table class="rs"><thead><tr><th>Nama RA</th><th class="r">Total Sales EA</th><th class="r">Target</th><th>Achievement</th><th class="r">Sisa Target</th><th class="r">Transaksi</th></tr></thead>
+  <tbody>${body}</tbody>
+  <tfoot><tr><td class="full nolbl" data-l="">Total Toko</td><td class="r" data-l="Total Sales EA">${rp(c.sales)}</td><td class="r" data-l="Target Toko">${c.target>0?rp(c.target):'–'}</td>
+  <td class="pc full" data-l="Achievement"><div class="pcell">${pbar('sb-all',c.ach,true)}<b>${pctTxt(c.ach)}</b></div></td><td class="r" data-l="Sisa Target">${c.target>0?rp(c.left):'–'}</td><td class="r" data-l="Transaksi">${c.count}</td></tr></tfoot></table></div>`:''}
+  <div class="card" style="margin-top:14px"><h3>Perbandingan Sales EA</h3>${chartHtml(c)}</div>`;
+  animate(el);
+}
+
+function filteredTxns(){
+  const f=state.tf,q=f.q.trim().toLowerCase();
+  return state.txns.filter(t=>{
+    if(f.from||f.to){if(f.from&&t.date<f.from)return false;if(f.to&&t.date>f.to)return false}
+    else if(state.month!=='all'&&!t.date.startsWith(state.month))return false;
+    if(f.ra&&t.raId!==f.ra)return false;
+    if(q&&!(String(t.invoice).toLowerCase().includes(q)||raName(t).toLowerCase().includes(q)))return false;
+    return true}).sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0));
+}
+function renderTrx(){
+  const el=$('#v-trx');
+  if(!el.dataset.init){
+    el.dataset.init=1;
+    el.innerHTML=`<div class="bar"><h2>Transaksi<small id="trxSub"></small></h2><div id="trxMonth"></div>
+      <button class="btn ghost" data-act="export">Ekspor Excel</button><button class="btn y" data-act="add-trx">+ Tambah</button></div>
+      <div class="filters">
+        <label class="field"><span>Dari tanggal</span><input type="date" id="tfFrom"></label>
+        <label class="field"><span>Sampai tanggal</span><input type="date" id="tfTo"></label>
+        <label class="field"><span>Sales Person</span><select id="tfRa"></select></label>
+        <label class="field"><span>Cari no. transaksi</span><input id="tfQ" type="search" placeholder="Nomor / nama RA"></label>
+        <button class="btn ghost" data-act="tf-reset">Reset</button></div>
+      <div class="sum" id="trxSum"></div><div id="trxList"></div>`;
+    $('#tfFrom').oninput=e=>{state.tf.from=e.target.value;renderTrxList()};
+    $('#tfTo').oninput=e=>{state.tf.to=e.target.value;renderTrxList()};
+    $('#tfRa').onchange=e=>{state.tf.ra=e.target.value;renderTrxList()};
+    $('#tfQ').oninput=e=>{state.tf.q=e.target.value;renderTrxList()};
+  }
+  $('#trxMonth').innerHTML=monthSelect();
+  $('#tfFrom').value=state.tf.from;$('#tfTo').value=state.tf.to;$('#tfQ').value=state.tf.q;
+  const ras=rasList();
+  $('#tfRa').innerHTML='<option value="">Semua RA</option>'+ras.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('');
+  $('#tfRa').value=ras.some(r=>r.id===state.tf.ra)?state.tf.ra:'';
+  renderTrxList();
+}
+function renderTrxList(){
+  const list=filteredTxns(),total=list.reduce((a,t)=>a+t.amount,0),rangeOn=state.tf.from||state.tf.to;
+  $('#trxSub').textContent=rangeOn?'Rentang tanggal aktif (periode bulan diabaikan)':'Riwayat transaksi EA · '+periodTxt();
+  $('#trxSum').innerHTML=`<span><b>${list.length}</b> transaksi</span><span>Total <b class="mono">${rp(total)}</b></span>`;
+  $('#trxList').innerHTML=list.length?`<div class="tw"><table class="rs"><thead><tr><th>Tanggal</th><th>No. Transaksi</th><th>Sales Person</th><th class="r">Nominal</th><th></th></tr></thead><tbody>${
+    list.map(t=>`<tr><td data-l="Tanggal">${fmtDate(t.date)}</td><td class="mono" data-l="No. Transaksi" style="word-break:break-all">${esc(t.invoice)}${t.source==='import'?'<span class="tag g">impor</span>':''}</td>
+    <td data-l="Sales Person">${esc(raName(t))}</td><td class="r mono" data-l="Nominal"><b>${rp(t.amount)}</b></td>
+    <td class="full nolbl"><div class="acts"><button class="btn ghost sm" data-act="edit" data-id="${t.id}">Edit</button><button class="btn danger sm" data-act="del" data-id="${t.id}">Hapus</button></div></td></tr>`).join('')}</tbody></table></div>`
+    :`<div class="tw"><div class="empty"><b>Tidak ada transaksi</b>${state.txns.length?'Coba ubah filter.':'Tekan “+ Tambah” atau impor dari Excel di Pengaturan.'}</div></div>`;
+}
+
+function renderSettings(){
+  const el=$('#v-settings');
+  if(el.contains(document.activeElement)&&['INPUT','TEXTAREA'].includes(document.activeElement.tagName)&&el.dataset.init)return;
+  el.dataset.init=1;
+  const keep=[$('#nRaName')?.value||'',$('#nRaTgt')?.value||''];
+  const m=state.setMonth,ras=rasList(),tg=state.settings.targets?.[m]||{},sumRa=ras.reduce((a,r)=>a+(Number(tg.ras?.[r.id])||0),0);
+  const fb=readFbConfig(),isFb=store.mode==='firebase';
+  const hasLocal=(()=>{try{const d=JSON.parse(lsGet(LOCAL_KEY)||'null');return d&&(Object.keys(d.txns||{}).length||Object.keys(d.settings?.ras||{}).length)}catch{return false}})();
+  el.innerHTML=`<div class="bar"><h2>Pengaturan<small>Target, daftar RA, impor data & sinkronisasi</small></h2></div>
+  <div class="stack">
+  <div class="card"><h3>Target Bulanan</h3>
+    <div class="row"><label class="field"><span>Bulan</span><input type="month" id="sMonth" value="${m}"></label>
+      <label class="field"><span>Target EA Toko (Rp)</span><input id="sStore" inputmode="numeric" value="${tg.store?Number(tg.store).toLocaleString('id-ID'):''}" placeholder="0"></label>
+      <button class="btn ghost" data-act="copy-prev">Salin dari bulan lalu</button></div>
+    <div class="hint" style="margin-top:8px">Target disimpan per bulan. Total target RA bulan ini: <b>${rp(sumRa)}</b>${tg.store&&sumRa!==Number(tg.store)?` <span class="hint warn">≠ target toko (${rp(tg.store)})</span>`:''}</div></div>
+
+  <div class="card"><h3>Sales Person (RA)<small>target untuk ${esc(monthLabel(m))}</small></h3>
+    ${ras.map(r=>`<div class="rarow" data-id="${r.id}"><input data-f="name" value="${esc(r.name)}" aria-label="Nama RA"><input data-f="target" inputmode="numeric" value="${tg.ras?.[r.id]?Number(tg.ras[r.id]).toLocaleString('id-ID'):''}" placeholder="Target (Rp)" aria-label="Target RA"><button class="btn danger sm" data-act="ra-del" data-id="${r.id}">Hapus</button></div>`).join('')||'<div class="hint">Belum ada RA.</div>'}
+    <div class="rarow" style="border-top:2px solid var(--ink);margin-top:6px"><input id="nRaName" placeholder="Nama RA baru" aria-label="Nama RA baru"><input id="nRaTgt" inputmode="numeric" placeholder="Target (Rp)" aria-label="Target RA baru"><button class="btn y sm" data-act="ra-add">Tambah</button></div>
+    <div class="hint" style="margin-top:8px">Nama & target tersimpan otomatis saat Anda selesai mengetik.</div></div>
+
+  <div class="card"><h3>Impor dari Excel</h3>
+    <div class="hint">Gunakan file laporan EA (kolom <code>Invoice No</code>, <code>Order Date</code>, <code>Transaction Type</code>, <code>Net Amount</code>, <code>Sales Person</code>). Hanya baris <b>Endless Aisle</b> yang diambil; nominal per transaksi = jumlah <code>Net Amount</code> per <code>Invoice No</code> (sudah setelah diskon, retur/tukar ikut terhitung, ongkir tidak). Nomor transaksi yang sudah ada dilewati.</div>
+    <div class="row" style="margin-top:12px"><label class="field"><span>File .xlsx / .xls / .csv</span><input type="file" id="impFile" accept=".xlsx,.xls,.csv"></label></div></div>
+
+  <div class="card" id="syncCard"><h3>Sinkronisasi Firebase</h3>
+    <div>Status: <b>${isFb?(state.status==='err'?'Firebase terhubung tetapi ada error':'Terhubung ke Firebase (real-time)'):'Mode lokal — data hanya di browser ini'}</b></div>
+    ${state.status==='err'?`<div class="hint warn" style="margin-top:8px">${esc(state.statusErr||'')}</div>`:''}
+    ${isFb?`<div class="hint">Project: <code>${esc(fb?.cfg?.projectId||'')}</code></div>
+      <div class="row" style="margin-top:12px">${hasLocal?'<button class="btn ghost" data-act="push-local">Unggah data lokal ke Firebase</button>':''}${fb?.fromCode?'':'<button class="btn danger" data-act="fb-off">Putuskan (kembali ke lokal)</button>'}</div>`
+    :`<div class="hint" style="margin-top:6px">Agar data dipakai bersama seluruh tim & tersinkron antarperangkat, hubungkan ke Firebase (gratis).</div>
+      <label class="field" style="margin-top:12px"><span>Tempel Firebase config</span><textarea id="fbCfg" placeholder='const firebaseConfig = {\n  apiKey: "...",\n  authDomain: "...",\n  projectId: "...",\n  appId: "..."\n};'></textarea></label>
+      <div class="row" style="margin-top:10px"><button class="btn y" data-act="fb-on">Hubungkan</button></div>`}
+    <details><summary>Langkah konfigurasi Firebase</summary><ol class="steps">
+      <li>Buka <code>console.firebase.google.com</code> → <b>Add project</b> (nama bebas, mis. <i>ea-tracker-eiger</i>).</li>
+      <li><b>Build → Firestore Database → Create database</b> (mode production, lokasi <code>asia-southeast2</code> Jakarta).</li>
+      <li><b>Build → Authentication → Get started → Sign-in method → Anonymous → Enable.</b></li>
+      <li><b>Project settings (ikon ⚙) → Your apps → ikon Web <code>&lt;/&gt;</code></b> → daftarkan app → salin objek <code>firebaseConfig</code>, tempel di kolom di atas → Hubungkan.</li>
+      <li>Di <b>Firestore → Rules</b>, tempel aturan berikut lalu <b>Publish</b>:
+<pre>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}</pre></li>
+      <li>Di <b>Authentication → Settings → Authorized domains</b>, tambahkan domain tempat aplikasi ini di-hosting.</li>
+      <li>Hosting file <code>index.html</code> (Firebase Hosting, Netlify, GitHub Pages, dsb.), lalu bagikan link ke tim. Setiap perangkat cukup menempel config sekali, atau isi <code>FIREBASE_CONFIG</code> di bagian atas kode agar otomatis.</li></ol></details>
+  </div></div>`;
+  $('#nRaName').value=keep[0];$('#nRaTgt').value=keep[1];
+  $('#impFile').onchange=e=>{const f=e.target.files[0];if(f)handleImportFile(f);e.target.value=''};
+  $$('.rarow input,#sStore,#nRaTgt',el).forEach(i=>{if(i.dataset.f==='target'||i.id==='sStore'||i.id==='nRaTgt')i.addEventListener('input',()=>{const p=i.selectionStart,l=i.value.length;i.value=fmtAmtInput(i.value).replace(/^-/,'');i.setSelectionRange(i.value.length-(l-p),i.value.length-(l-p))})});
+}
+
+/* ================= aksi data ================= */
+function toast(msg,bad){const t=document.createElement('div');t.className='toast'+(bad?' bad':'');t.textContent=msg;$('#toasts').append(t);setTimeout(()=>t.remove(),3200)}
+async function safe(fn,okMsg){state.lastWrite=Date.now();try{await fn();if(okMsg)toast(okMsg)}catch(e){console.error(e);toast('Gagal menyimpan: '+(e.code||e.message||e),true)}}
+function confirmDlg(title,msg,yes='Hapus'){return new Promise(res=>{const d=$('#dConfirm');$('#cTitle').textContent=title;$('#cMsg').innerHTML=msg;$('#cYes').textContent=yes;
+  const done=v=>{d.close();res(v)};$('#cYes').onclick=()=>done(true);$('#cNo').onclick=()=>done(false);d.oncancel=()=>res(false);d.showModal()})}
+
+function openTrx(id){
+  const ras=rasList();state.editId=id||null;
+  const t=id&&state.txns.find(x=>x.id===id);
+  $('#dTrxTitle').textContent=t?'Edit Transaksi EA':'Input Transaksi EA';
+  $('#fRa').innerHTML=ras.length?'<option value="">Pilih RA…</option>'+ras.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join(''):'<option value="">Belum ada RA — tambah di Pengaturan</option>';
+  const last=lsGet('ea_last_ra');
+  $('#fRa').value=t?t.raId:(ras.some(r=>r.id===last)?last:'');
+  $('#fDate').value=t?t.date:(lsGet('ea_last_date')||todayStr());
+  $('#fInv').value=t?t.invoice:'';
+  $('#fAmt').value=t?fmtAmtInput(String(t.amount)):'';
+  $('#fErr').textContent='';$$('#fTrx .bad').forEach(e=>e.classList.remove('bad'));
+  $('#dTrx').showModal();
+  setTimeout(()=>(t?$('#fInv'):$('#fRa').value?$('#fInv'):$('#fRa')).focus(),50);
+}
+async function saveTrx(e){
+  e.preventDefault();
+  const raId=$('#fRa').value,date=$('#fDate').value,inv=$('#fInv').value.trim(),amt=parseAmt($('#fAmt').value);
+  const bad=[];if(!raId)bad.push('fRa');if(!date)bad.push('fDate');if(!inv)bad.push('fInv');if(isNaN(amt)||amt===0)bad.push('fAmt');
+  $$('#fTrx .bad').forEach(x=>x.classList.remove('bad'));bad.forEach(i=>$('#'+i).classList.add('bad'));
+  if(bad.length){$('#fErr').textContent='Lengkapi semua kolom (nominal tidak boleh 0).';return}
+  if(state.txns.some(t=>t.id!==state.editId&&normInv(t.invoice)===normInv(inv))){$('#fInv').classList.add('bad');$('#fErr').textContent='Nomor transaksi ini sudah tercatat.';return}
+  const old=state.editId&&state.txns.find(t=>t.id===state.editId);
+  const rec={id:state.editId||undefined,raId,raName:state.settings.ras[raId]?.name||'',date,invoice:inv,amount:amt,source:old?.source||'manual',createdAt:old?.createdAt||Date.now()};
+  $('#fSave').disabled=true;
+  await safe(()=>store.saveTxn(rec),old?'Transaksi diperbarui':'Transaksi disimpan');
+  $('#fSave').disabled=false;
+  lsSet('ea_last_ra',raId);lsSet('ea_last_date',date);$('#dTrx').close();
+}
+
+/* import excel */
+let impPlan=null;
+function excelDate(v){
+  if(v instanceof Date)return `${v.getFullYear()}-${pad(v.getMonth()+1)}-${pad(v.getDate())}`;
+  if(typeof v==='number'){const d=XLSX.SSF.parse_date_code(v);return d?`${d.y}-${pad(d.m)}-${pad(d.d)}`:null}
+  const m=String(v||'').match(/(\d{4})-(\d{2})-(\d{2})/);if(m)return `${m[1]}-${m[2]}-${m[3]}`;
+  const m2=String(v||'').match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);if(m2)return `${m2[3]}-${pad(m2[2])}-${pad(m2[1])}`;
+  return null;
+}
+async function handleImportFile(file){
+  if(typeof XLSX==='undefined'){toast('Pustaka Excel belum termuat (cek koneksi internet).',true);return}
+  try{
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:null});
+    const hi=rows.findIndex(r=>r&&r.some(c=>String(c).trim()==='Invoice No'));
+    if(hi<0)throw new Error('Kolom "Invoice No" tidak ditemukan. Pastikan ini file laporan EA.');
+    const H=rows[hi].map(c=>String(c??'').trim()),ix=n=>H.indexOf(n);
+    const cI=ix('Invoice No'),cD=ix('Order Date'),cT=ix('Transaction Type'),cN=ix('Net Amount'),cO=ix('Order Amount'),cS=ix('Sales Person'),cB=ix('Bill Status');
+    if([cD,cS].some(i=>i<0)||(cN<0&&cO<0))throw new Error('Kolom wajib (Order Date, Sales Person, Net Amount) tidak lengkap.');
+    const inv=new Map();let skipType=0,skipCancel=0,skipBad=0;
+    for(const r of rows.slice(hi+1)){
+      if(!r||!r[cI])continue;
+      if(cT>=0&&!/endless/i.test(String(r[cT]||''))){skipType++;continue}
+      if(cB>=0&&/cancel/i.test(String(r[cB]||''))){skipCancel++;continue}
+      const key=String(r[cI]).trim(),n=Number(cN>=0?r[cN]:r[cO]);
+      const date=excelDate(r[cD]);
+      if(!date||isNaN(n)){skipBad++;continue}
+      const o=inv.get(key)||{invoice:key,date,ra:String(r[cS]||'').replace(/\s+/g,' ').trim(),amount:0};
+      o.amount+=n;inv.set(key,o);
+    }
+    const have=new Set(state.txns.map(t=>normInv(t.invoice)));
+    const byName=new Map(rasList().map(r=>[normName(r.name),r]));
+    const add=[],dup=[];
+    for(const o of inv.values()){(have.has(normInv(o.invoice))?dup:add).push(o)}
+    const newRas=new Map();
+    add.forEach(o=>{if(!byName.has(normName(o.ra))&&!newRas.has(normName(o.ra)))newRas.set(normName(o.ra),o.ra||'(tanpa nama)')});
+    impPlan={add,dup,newRas,byName,skipType,skipCancel,skipBad};
+    const perRa=new Map();add.forEach(o=>{const p=perRa.get(normName(o.ra))||{n:o.ra,c:0,s:0};p.c++;p.s+=o.amount;perRa.set(normName(o.ra),p)});
+    $('#impBody').innerHTML=`<div class="imp-sum"><div><b>${add.length}</b><span>transaksi baru</span></div><div><b>${dup.length}</b><span>sudah ada (dilewati)</span></div><div><b>${rp(add.reduce((a,o)=>a+o.amount,0))}</b><span>total nominal baru</span></div></div>
+    <div class="hint">Dilewati: ${skipType} baris bukan Endless Aisle${skipCancel?`, ${skipCancel} dibatalkan`:''}${skipBad?`, ${skipBad} baris tak valid`:''}. Nominal 0 / negatif tetap diimpor (tukar/retur).</div>
+    ${newRas.size?`<div class="hint warn">RA baru akan dibuat otomatis (target Rp0, atur di Pengaturan): <b>${[...newRas.values()].map(esc).join(', ')}</b></div>`:''}
+    ${add.length?`<div class="tw"><table><thead><tr><th>RA</th><th class="r">Transaksi</th><th class="r">Nominal</th></tr></thead><tbody>${[...perRa.values()].map(p=>`<tr><td>${esc(p.n)}${newRas.has(normName(p.n))?'<span class="tag">baru</span>':''}</td><td class="r">${p.c}</td><td class="r mono">${rp(p.s)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty"><b>Tidak ada data baru</b>Semua nomor transaksi sudah tercatat.</div>'}`;
+    $('#impGo').disabled=!add.length;$('#dImp').showModal();
+  }catch(e){console.error(e);toast(e.message||'Gagal membaca file',true)}
+}
+async function runImport(){
+  const p=impPlan;if(!p)return;$('#impGo').disabled=true;
+  await safe(async()=>{
+    const patch={},ids=new Map([...p.byName].map(([k,r])=>[k,r.id]));let ord=Date.now();
+    for(const[k,name]of p.newRas){const id=uid();ids.set(k,id);patch[`ras.${id}`]={name,order:ord++}}
+    if(Object.keys(patch).length)await store.patchSettings(patch);
+    const now=Date.now();
+    await store.addTxns(p.add.map((o,i)=>{const id=ids.get(normName(o.ra));
+      return{id:'imp_'+o.invoice.replace(/[^A-Za-z0-9_-]/g,'_'),raId:id,raName:state.settings.ras[id]?.name||p.newRas.get(normName(o.ra))||o.ra,date:o.date,invoice:o.invoice,amount:o.amount,source:'import',createdAt:now+i}}));
+  },`${p.add.length} transaksi diimpor`);
+  $('#dImp').close();impPlan=null;
+}
+function exportXlsx(){
+  if(typeof XLSX==='undefined'){toast('Pustaka Excel belum termuat.',true);return}
+  const list=filteredTxns().map(t=>({Tanggal:t.date,'No Transaksi':t.invoice,'Sales Person':raName(t),'Nominal EA':t.amount}));
+  const ws=XLSX.utils.json_to_sheet(list),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Transaksi EA');
+  XLSX.writeFile(wb,`EA-Transaksi-${todayStr()}.xlsx`);
+}
+
+/* ================= event ================= */
+document.addEventListener('click',async e=>{
+  const tb=e.target.closest('[data-tab]');if(tb){goTab(tb.dataset.tab);return}
+  if(e.target.closest('[data-close]')){e.target.closest('dialog').close();return}
+  const a=e.target.closest('[data-act]');if(!a)return;
+  const id=a.dataset.id,act=a.dataset.act;
+  if(act==='add-trx')openTrx();
+  else if(act==='edit')openTrx(id);
+  else if(act==='del'){const t=state.txns.find(x=>x.id===id);
+    if(await confirmDlg('Hapus transaksi?',`<b>${esc(t.invoice)}</b><br>${esc(raName(t))} · ${rp(t.amount)}<br><span class="hint">Tindakan ini tidak bisa dibatalkan.</span>`))safe(()=>store.deleteTxn(id),'Transaksi dihapus')}
+  else if(act==='ra-trx'){state.tf={from:'',to:'',ra:id,q:''};goTab('trx')}
+  else if(act==='tf-reset'){state.tf={from:'',to:'',ra:'',q:''};renderTrx()}
+  else if(act==='export')exportXlsx();
+  else if(act==='goto-sync'){goTab('settings');setTimeout(()=>$('#syncCard')?.scrollIntoView({behavior:'smooth'}),60)}
+  else if(act==='ra-add'){
+    const name=$('#nRaName').value.trim(),tg=parseAmt($('#nRaTgt').value);
+    if(!name){toast('Isi nama RA',true);return}
+    if(rasList().some(r=>normName(r.name)===normName(name))){toast('Nama RA sudah ada',true);return}
+    const rid=uid(),p={[`ras.${rid}`]:{name,order:Date.now()}};if(tg>0)p[`targets.${state.setMonth}.ras.${rid}`]=tg;
+    await safe(()=>store.patchSettings(p),'RA ditambahkan');$('#nRaName').value='';$('#nRaTgt').value='';$('#v-settings').dataset.init='';renderSettings();
+  }
+  else if(act==='ra-del'){
+    const r=state.settings.ras[id],n=state.txns.filter(t=>t.raId===id).length;
+    if(await confirmDlg('Hapus RA?',`<b>${esc(r.name)}</b> akan dihapus beserta targetnya.${n?`<br><span class="hint warn">${n} transaksi RA ini tetap tersimpan dan tampil sebagai “(RA dihapus)” di total toko.</span>`:''}`)){
+      const p={[`ras.${id}`]:DEL};Object.keys(state.settings.targets||{}).forEach(m=>{if(state.settings.targets[m]?.ras?.[id]!=null)p[`targets.${m}.ras.${id}`]=DEL});
+      await safe(()=>store.patchSettings(p),'RA dihapus');$('#v-settings').dataset.init='';renderSettings()}
+  }
+  else if(act==='copy-prev'){
+    const[y,m]=state.setMonth.split('-').map(Number),pm=new Date(y,m-2,1),k=`${pm.getFullYear()}-${pad(pm.getMonth()+1)}`,src=state.settings.targets?.[k];
+    if(!src){toast('Belum ada target di '+monthLabel(k),true);return}
+    await safe(()=>store.patchSettings({[`targets.${state.setMonth}`]:JSON.parse(JSON.stringify(src))}),'Target disalin dari '+monthLabel(k));
+    $('#v-settings').dataset.init='';renderSettings();
+  }
+  else if(act==='fb-on'){
+    const c=parseFbConfig($('#fbCfg').value);if(!c){toast('Config tidak valid (apiKey & projectId wajib ada)',true);return}
+    lsSet('ea_fb_config',JSON.stringify(c));location.reload();
+  }
+  else if(act==='fb-off'){if(await confirmDlg('Putuskan Firebase?','Aplikasi kembali ke mode lokal. Data di Firebase tidak dihapus.','Putuskan')){try{localStorage.removeItem('ea_fb_config')}catch{}location.reload()}}
+  else if(act==='push-local'){
+    try{const raw=JSON.parse(lsGet(LOCAL_KEY));await store.pushLocal(raw);toast('Data lokal diunggah ke Firebase')}catch(err){toast('Gagal: '+(err.code||err.message),true)}
+  }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.act==='month'){state.month=t.value;lsSet('ea_month',t.value);render();return}
+  if(t.id==='sMonth'){if(t.value){state.setMonth=t.value;$('#v-settings').dataset.init='';renderSettings()}return}
+  if(t.id==='sStore'){const v=parseAmt(t.value);safe(()=>store.patchSettings({[`targets.${state.setMonth}.store`]:isNaN(v)?DEL:v}),'Target toko disimpan');return}
+  const row=t.closest('.rarow[data-id]');
+  if(row&&t.dataset.f){const id=row.dataset.id;
+    if(t.dataset.f==='name'){const n=t.value.trim();if(!n){t.value=state.settings.ras[id].name;toast('Nama RA tidak boleh kosong',true);return}
+      if(rasList().some(r=>r.id!==id&&normName(r.name)===normName(n))){t.value=state.settings.ras[id].name;toast('Nama RA sudah ada',true);return}
+      safe(()=>store.patchSettings({[`ras.${id}.name`]:n}),'Nama RA disimpan')}
+    else{const v=parseAmt(t.value);safe(()=>store.patchSettings({[`targets.${state.setMonth}.ras.${id}`]:isNaN(v)||v<=0?DEL:v}),'Target RA disimpan')}
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='nRaName')$('[data-act=ra-add]').click()});
+$('#fAmt').addEventListener('input',e=>{const el=e.target,p=el.selectionStart,l=el.value.length;el.value=fmtAmtInput(el.value);const q=el.value.length-(l-p);el.setSelectionRange(q,q)});
+$('#fTrx').addEventListener('submit',saveTrx);
+$('#impGo').addEventListener('click',runImport);
+$$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d&&d.id!=='dConfirm'){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close()}}));
+addEventListener('online',()=>setStatus(state.status));addEventListener('offline',()=>setStatus('off'));
+
+/* ================= status & start ================= */
+function setStatus(s,err){
+  state.status=s;if(err){state.statusErr=err.code==='permission-denied'?'Akses ditolak oleh Firestore Rules. Pastikan Anonymous sign-in aktif & rules sudah dipublish (lihat langkah di bawah).':(err.message||String(err))}
+  const b=$('#sync'),eff=(!navigator.onLine&&s!=='local')?'off':s;
+  b.className='sync '+({on:'on',err:'err',wait:'wait',off:'err'}[eff]||'');
+  b.querySelector('span').textContent={local:'Mode lokal',wait:'Menghubungkan…',on:'Tersinkron',err:'Error sinkronisasi',off:'Offline'}[eff];
+  if(state.tab==='settings'&&state.ready){const el=$('#v-settings');el.dataset.init='';renderSettings()}
+}
+function onData(d){state.settings={ras:d.settings.ras||{},targets:d.settings.targets||{}};state.txns=d.txns.filter(t=>t&&t.date&&typeof t.amount==='number');state.ready=true;
+  if(!state.setMonth)state.setMonth=todayStr().slice(0,7);render()}
+(async function boot(){
+  buildNav();
+  const fb=readFbConfig();
+  try{store=fb?await createFirebaseStore(fb.cfg):createLocalStore()}
+  catch(e){console.error(e);toast('Firebase gagal dimuat — memakai mode lokal',true);store=createLocalStore()}
+  const saved=lsGet('ea_tab');
+  state.ready=true;goTab(TABS.some(t=>t[0]===saved)?saved:'dashboard');state.ready=false;
+  store.start(onData,setStatus);
+})();
+</script>
+</body>
+</html>
